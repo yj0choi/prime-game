@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d1117">
+    <title>19단 Master - Coming Soon</title>
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Pretendard:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        .game-area {
+            margin: 2rem 0;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            border: 1px dashed var(--glass-border);
+        }
+        .question-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--text-main);
+        }
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        .option-btn {
+            width: 100%;
+            padding: 1.2rem;
+            font-size: 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(88, 166, 255, 0.2);
+        }
+        .option-btn.correct {
+            background: var(--success) !important;
+            border-color: var(--success);
+            color: white;
+        }
+        .option-btn.wrong {
+            background: var(--error) !important;
+            border-color: var(--error);
+            color: white;
+        }
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .stat-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .stat-box .label {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+            margin-bottom: 0.2rem;
+        }
+        .stat-box .val {
+            font-size: 1.4rem;
+            color: var(--primary);
+        }
+        .mini-btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.75rem;
+            border-radius: 8px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-sub);
+            cursor: pointer;
+            transition: all 0.2s;
+            height: fit-content;
+            align-self: center;
+        }
+        .mini-btn:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        .timer-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        #timer-bar {
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.1s linear, background-color 0.3s;
+        }
+        #timer-bar.warning {
+            background: var(--error);
+        }
+        .result-overlay {
+            flex-direction: column;
+        }
+        .result-overlay h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .score-display {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            font-weight: 800;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <div class="nav-header">
+                <a href="../../index.html" class="back-link">← 메인으로</a>
+            </div>
+            <h1>19단 <span class="accent">MASTER</span></h1>
+        </header>
+
+        <main id="game-view">
+            <div class="stats-bar">
+                <div class="stat-box">
+                    <span class="label">ROUND</span>
+                    <span class="val"><span id="round-num">1</span> / 10</span>
+                </div>
+                <div class="stat-box">
+                    <span class="label">SCORE</span>
+                    <span class="val" id="score-val">0</span>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button id="rank-view-btn" class="mini-btn">랭킹</button>
+                </div>
+            </div>
+
+            <div class="game-area">
+                <div id="question" class="question-text">11 x 11 =</div>
+                <div class="options-container" id="options">
+                    <button class="option-btn">121</button>
+                    <button class="option-btn">131</button>
+                    <button class="option-btn">141</button>
+                </div>
+            </div>
+
+            <div class="timer-container">
+                <div id="timer-bar"></div>
+            </div>
+        </main>
+
+        <!-- 정답/오답 결과 오버레이 (잠시 표시됨) -->
+        <div id="feedback-overlay" class="overlay hidden">
+            <div class="message-content">
+                <h2 id="feedback-text">CORRECT!</h2>
+            </div>
+        </div>
+
+        <!-- 게임 종료 오버레이 -->
+        <div id="game-over-overlay" class="overlay hidden result-overlay">
+            <div class="message-content">
+                <h2>GAME OVER</h2>
+                <div class="score-display">최종 점수: <span id="final-score">0</span></div>
+                
+                <div id="rank-input-area" class="hidden">
+                    <p style="margin-bottom: 1rem;">축하합니다! TOP 5에 진입했습니다.</p>
+                    <input type="text" id="player-name" placeholder="이름을 입력하세요" maxlength="10">
+                    <button class="primary-btn" id="save-rank" style="width: 100%;">랭킹 등록</button>
+                </div>
+
+                <div id="leaderboard-view-in-game" class="hidden">
+                    <button class="primary-btn" onclick="location.reload()" style="width: 100%;">다시 시작</button>
+                </div>
+                
+                <div id="normal-end-view" class="hidden">
+                    <button class="primary-btn" onclick="location.reload()" style="width: 100%;">다시 시작</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 랭킹 오버레이 (독립되어 헤더 버튼으로도 접근 가능) -->
+        <div id="leaderboard-overlay" class="overlay hidden">
+            <div class="message-content">
+                <h3 style="margin-bottom: 1.5rem; font-family: 'Orbitron', sans-serif; letter-spacing: 2px;">TOP 5 RANKING</h3>
+                <ul id="leaderboard-list" class="ranking-list"></ul>
+                <button class="secondary-btn" id="close-rank-btn" style="width: 100%;">닫기</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 Math Game Platform. Challenge Your Brain.</p>
+        </footer>
+    </div>
+    <script src="../../assets/js/ranking.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

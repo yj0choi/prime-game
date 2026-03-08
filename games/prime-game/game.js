@@ -6,7 +6,9 @@ class PrimeGame {
         this.cardPool = [];
         this.selectedCards = [];
         this.availableCards = [];
-        this.rankings = this.loadRankings();
+
+        // Ranking Manager
+        this.rankingManager = new RankingManager('primeMakerRankings', 'rank-list', 'leaderboard-overlay');
 
         // DOM Elements
         this.roundEl = document.getElementById('round-value');
@@ -21,17 +23,15 @@ class PrimeGame {
         this.statusTitle = document.getElementById('status-title');
         this.statusDesc = document.getElementById('status-desc');
 
-        // New Overlays & Controls
+        // Overlays & Controls
         this.rankViewBtn = document.getElementById('rank-view-btn');
         this.rankEntryOverlay = document.getElementById('rank-entry-overlay');
-        this.leaderboardOverlay = document.getElementById('leaderboard-overlay');
         this.finalScoreEl = document.getElementById('final-score');
         this.newRecordInput = document.getElementById('new-record-input');
         this.playerNameInput = document.getElementById('player-name');
         this.saveRankBtn = document.getElementById('save-rank-btn');
         this.restartBtn = document.getElementById('restart-btn');
         this.closeRankBtn = document.getElementById('close-rank-btn');
-        this.rankList = document.getElementById('rank-list');
         this.mainRestartBtn = document.getElementById('main-restart-btn');
 
         // Timer State
@@ -48,17 +48,12 @@ class PrimeGame {
         this.resetBtn.addEventListener('click', () => this.resetSelection());
         this.noPrimeBtn.addEventListener('click', () => this.handleNoPrimeClick());
         this.nextBtn.addEventListener('click', () => this.nextRound());
-        this.rankViewBtn.addEventListener('click', () => this.showLeaderboard());
-        this.closeRankBtn.addEventListener('click', () => this.leaderboardOverlay.classList.add('hidden'));
+        this.rankViewBtn.addEventListener('click', () => this.rankingManager.show());
+        this.closeRankBtn.addEventListener('click', () => this.rankingManager.hide());
         this.restartBtn.addEventListener('click', () => location.reload());
         this.mainRestartBtn.addEventListener('click', () => this.restartGame());
         this.saveRankBtn.addEventListener('click', () => this.saveCurrentRank());
         this.startLevel();
-    }
-
-    loadRankings() {
-        const saved = localStorage.getItem('primeMakerRankings');
-        return saved ? JSON.parse(saved) : [];
     }
 
     isPrime(num) {
@@ -82,13 +77,9 @@ class PrimeGame {
     }
 
     generateValidCards() {
-        // 난이도 조절: 1~4라운드 2개, 5~10라운드 3개 고정
         const count = this.round <= 4 ? 2 : 3;
-        
         const badNumbers = [0, 4, 6, 8, 9];
         const goodNumbers = [1, 2, 3, 5, 7];
-        
-        // 15% 확률로 소수를 절대 만들 수 없는 카드 세트 생성 시도
         const allowImpossible = Math.random() < 0.15;
 
         let attempts = 0;
@@ -105,13 +96,13 @@ class PrimeGame {
 
             const hasPrime = this.hasPossibleTwoDigitPrime(cards);
             if (allowImpossible) {
-                if (!hasPrime) return cards; // 소수 생성이 안 되는 케이스 성공
+                if (!hasPrime) return cards;
             } else {
-                if (hasPrime) return cards; // 소수 생성이 되는 케이스 성공
+                if (hasPrime) return cards;
             }
             attempts++;
         }
-        return [1, 0, 1]; // 안전 장치
+        return [1, 0, 1];
     }
 
     hasPossibleTwoDigitPrime(cards) {
@@ -174,13 +165,14 @@ class PrimeGame {
         this.statusTitle.className = "error-text";
         this.statusDesc.textContent = "제한 시간이 초과되었습니다.";
         this.overlay.classList.remove('hidden');
-        this.nextBtn.textContent = this.round >= this.totalRounds ? "최종 결과 보기" : "다음 라운드";
         document.getElementById('app').classList.add('shake');
         setTimeout(() => document.getElementById('app').classList.remove('shake'), 500);
+        setTimeout(() => this.nextRound(), 1000);
     }
 
     handleNoPrimeClick() {
         const hasPrime = this.hasPossibleTwoDigitPrime(this.cardPool);
+        const timeBonus = Math.floor(this.timeLeft) * 10;
         
         this.stopTimer();
         this.overlay.classList.remove('hidden');
@@ -188,8 +180,8 @@ class PrimeGame {
         if (!hasPrime) {
             this.statusTitle.textContent = "GENIUS!";
             this.statusTitle.className = "success-text";
-            this.statusDesc.textContent = "현재 카드로 소수를 만들 수 없음을 간파하셨습니다! (+100점)";
-            this.score += 100;
+            this.statusDesc.textContent = `소수를 만들 수 없음을 간파하셨습니다! (+100 +${timeBonus} Bonus)`;
+            this.score += (100 + timeBonus);
         } else {
             this.statusTitle.textContent = "FAILED...";
             this.statusTitle.className = "error-text";
@@ -197,7 +189,7 @@ class PrimeGame {
             document.getElementById('app').classList.add('shake');
             setTimeout(() => document.getElementById('app').classList.remove('shake'), 500);
         }
-        this.nextBtn.textContent = this.round >= this.totalRounds ? "최종 결과 보기" : "다음 라운드";
+        setTimeout(() => this.nextRound(), 1000);
     }
 
     render() {
@@ -224,7 +216,6 @@ class PrimeGame {
         });
 
         this.placeholder.classList.toggle('hidden', this.selectedCards.length > 0);
-        // 제출 버튼 활성화 조건: 선택된 카드로 구성된 숫자가 10 이상이어야 함
         const currentVal = parseInt(this.selectedCards.join('')) || 0;
         this.submitBtn.disabled = this.selectedCards.length === 0 || currentVal < 10;
     }
@@ -246,32 +237,31 @@ class PrimeGame {
     checkResult() {
         const finalNum = parseInt(this.selectedCards.join(''));
         const isPrime = this.isPrime(finalNum);
+        const timeBonus = Math.floor(this.timeLeft) * 10;
 
         this.stopTimer();
         this.overlay.classList.remove('hidden');
         if (isPrime) {
             this.statusTitle.textContent = "SUCCESS!";
             this.statusTitle.className = "success-text";
-            this.statusDesc.textContent = `${finalNum}은(는) 소수가 맞습니다!`;
-            // 점수 시스템 개편: 소수 값 자체를 누적
-            this.score += finalNum;
+            this.statusDesc.textContent = `${finalNum}은(는) 소수가 맞습니다! (+${timeBonus} Bonus)`;
+            this.score += (finalNum + timeBonus);
         } else {
             this.statusTitle.textContent = "FAILED...";
             this.statusTitle.className = "error-text";
             const factor = this.getSmallestFactor(finalNum);
             const other = finalNum / factor;
-            this.statusDesc.textContent = `${finalNum}은(는) 소수가 아닙니다. (${factor} × ${other} = ${finalNum})`;
+            this.statusDesc.innerHTML = `${finalNum}은(는) 소수가 아닙니다.<br><span style="display:block; margin-top:10px; opacity:0.8; font-size:0.9em;">(${factor} × ${other} = ${finalNum})</span>`;
             document.getElementById('app').classList.add('shake');
             setTimeout(() => document.getElementById('app').classList.remove('shake'), 500);
         }
-        this.nextBtn.textContent = this.round >= this.totalRounds ? "최종 결과 보기" : "다음 라운드";
+        setTimeout(() => this.nextRound(), 1000);
     }
 
     nextRound() {
-        this.nextBtn.disabled = true; // 버튼 비활성화
+        this.nextBtn.disabled = true;
         this.overlay.classList.add('hidden');
         if (this.round >= this.totalRounds) {
-            // 10라운드 종료 시 300ms 지연 후 endGame 호출 (더블 클릭 방지)
             setTimeout(() => {
                 this.endGame();
                 this.nextBtn.disabled = false;
@@ -292,25 +282,14 @@ class PrimeGame {
         this.startLevel();
     }
 
-
-    deleteRank(index) {
-        if (confirm("이 기록을 삭제하시겠습니까?")) {
-            this.rankings.splice(index, 1);
-            localStorage.setItem('primeMakerRankings', JSON.stringify(this.rankings));
-            this.showLeaderboard();
-        }
-    }
-
     endGame() {
         this.rankEntryOverlay.classList.remove('hidden');
         this.finalScoreEl.textContent = this.score;
         
-        // 랭킹 진입 확인 (Top 5)
-        const isHighScore = this.rankings.length < 5 || this.score > this.rankings[this.rankings.length - 1].score;
+        const isHighScore = this.rankingManager.checkTop5(this.score);
         
         if (isHighScore) {
             this.newRecordInput.classList.remove('hidden');
-            // 이름 입력창에 자동 포커스
             setTimeout(() => this.playerNameInput.focus(), 100);
         } else {
             this.newRecordInput.classList.add('hidden');
@@ -319,41 +298,9 @@ class PrimeGame {
 
     saveCurrentRank() {
         const name = this.playerNameInput.value.trim() || "무명 용사";
-        const newRank = { name, score: this.score, date: new Date().toLocaleDateString() };
-        
-        this.rankings.push(newRank);
-        this.rankings.sort((a, b) => b.score - a.score);
-        this.rankings = this.rankings.slice(0, 5); // TOP 5
-        
-        localStorage.setItem('primeMakerRankings', JSON.stringify(this.rankings));
-        this.showLeaderboard();
+        this.rankingManager.save(name, this.score);
+        this.rankingManager.show();
         this.rankEntryOverlay.classList.add('hidden');
-    }
-
-    showLeaderboard() {
-        this.rankList.innerHTML = '';
-        if (this.rankings.length === 0) {
-            this.rankList.innerHTML = '<li>등록된 기록이 없습니다.</li>';
-        } else {
-            this.rankings.forEach((rank, index) => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <div class="rank-info">
-                        <span class="rank-num">${index + 1}위</span>
-                        <span class="player-name">${rank.name}</span>
-                        <span class="player-score">${rank.score}점</span>
-                    </div>
-                    <button class="delete-rank-item" title="기록 삭제">&times;</button>
-                `;
-                // X 버튼 클릭 이벤트 연결
-                li.querySelector('.delete-rank-item').onclick = (e) => {
-                    e.stopPropagation();
-                    this.deleteRank(index);
-                };
-                this.rankList.appendChild(li);
-            });
-        }
-        this.leaderboardOverlay.classList.remove('hidden');
     }
 }
 

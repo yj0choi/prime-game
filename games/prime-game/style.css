@@ -1,0 +1,154 @@
+/* Game-specific styles for Prime Maker */
+@import url('../../assets/css/main.css');
+
+.stats {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.stat-item.header-controls {
+    flex-direction: row;
+    gap: 0.8rem;
+    align-items: center;
+}
+
+.mini-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.7rem;
+    border-radius: 8px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-sub);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mini-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.label {
+    font-size: 0.7rem;
+    color: var(--text-sub);
+    font-weight: 700;
+}
+
+.value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+#timer-value.warning {
+    color: var(--error);
+    animation: pulse 0.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Card Areas */
+.card-area {
+    min-height: 120px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    margin: 1.5rem 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    border: 1px dashed var(--glass-border);
+}
+
+.cards-container {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.placeholder-text {
+    color: var(--text-sub);
+    font-size: 0.9rem;
+    pointer-events: none;
+}
+
+/* Individual Card */
+.card {
+    width: 60px;
+    height: 80px;
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    user-select: none;
+    -webkit-user-select: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    touch-action: none;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(88, 166, 255, 0.3);
+    border-color: var(--primary);
+}
+
+#controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+/* Game Status Feedback */
+#status-title {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.success-text { color: var(--success); }
+.error-text { color: var(--error); }
+
+#status-desc {
+    margin-bottom: 1.5rem;
+    color: var(--text-sub);
+}
+
+.shake {
+    animation: shake 0.5s;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@media (max-width: 480px) {
+    .stats {
+        gap: 0.5rem;
+    }
+    .value {
+        font-size: 1.2rem;
+    }
+}

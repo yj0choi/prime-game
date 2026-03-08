@@ -71,6 +71,16 @@ class PrimeGame {
         return true;
     }
 
+    getSmallestFactor(num) {
+        if (num % 2 === 0) return 2;
+        if (num % 3 === 0) return 3;
+        for (let i = 5; i * i <= num; i += 6) {
+            if (num % i === 0) return i;
+            if (num % (i + 2) === 0) return i + 2;
+        }
+        return num;
+    }
+
     generateValidCards() {
         // 난이도 조절: 1~4라운드 2개, 5~10라운드 3개 고정
         const count = this.round <= 4 ? 2 : 3;
@@ -248,7 +258,9 @@ class PrimeGame {
         } else {
             this.statusTitle.textContent = "FAILED...";
             this.statusTitle.className = "error-text";
-            this.statusDesc.textContent = `${finalNum}은(는) 소수가 아닙니다.`;
+            const factor = this.getSmallestFactor(finalNum);
+            const other = finalNum / factor;
+            this.statusDesc.textContent = `${finalNum}은(는) 소수가 아닙니다. (${factor} × ${other} = ${finalNum})`;
             document.getElementById('app').classList.add('shake');
             setTimeout(() => document.getElementById('app').classList.remove('shake'), 500);
         }

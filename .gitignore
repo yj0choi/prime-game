@@ -1,3 +1,21 @@
-/.cursorrules
-/deployment_guide.md
-/prime-game.code-workspace
+# IDE & Editor Settings
+.cursorrules
+prime-game.code-workspace
+.vscode/
+.idea/
+
+# Development & Deployment Guides
+deployment_guide.md
+
+# Environment Variables & Sensitive Data
+.env
+.env.local
+.env.*.local
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+
+# Dependencies (if any added later)
+node_modules/
+package-lock.json

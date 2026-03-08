@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0d1117">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>소수 만들기 (Make a Prime)</title>
+    <meta name="description" content="숫자 카드를 조합하여 소수를 만드는 두뇌 퍼즐 게임">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Pretendard:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app" class="glass">
+        <header>
+            <h1>PRIME <span class="accent">MAKER</span></h1>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="label">ROUND</span>
+                    <span id="round-value" class="value">1 / 10</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">SCORE</span>
+                    <span id="score-value" class="value">0</span>
+                </div>
+                <div id="timer-area" class="stat-item">
+                    <span class="label">TIME</span>
+                    <span id="timer-value" class="value">10</span>
+                </div>
+                <div class="stat-item header-controls">
+                    <button id="main-restart-btn" class="mini-btn">게임 재시작</button>
+                    <button id="rank-view-btn" class="mini-btn">랭킹</button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <section id="selected-area" class="card-area">
+                <div id="selected-cards" class="cards-container">
+                    <!-- 선택된 카드들이 여기에 나타납니다 -->
+                </div>
+                <div class="placeholder-text" id="placeholder">숫자를 선택하세요 (최소 2자리)</div>
+            </section>
+
+            <section id="controls">
+                <button id="submit-btn" class="primary-btn" disabled>제출 (Check)</button>
+                <button id="reset-btn" class="secondary-btn">다시 선택</button>
+                <button id="no-prime-btn" class="secondary-btn">소수 없음</button>
+            </section>
+
+            <section id="pool-area" class="card-area">
+                <div id="card-pool" class="cards-container">
+                    <!-- 랜덤 카드가 여기에 생성됩니다 -->
+                </div>
+            </section>
+        </main>
+
+        <!-- 결과 및 다음 라운드 오버레이 -->
+        <div id="message-overlay" class="hidden">
+            <div class="message-content glass">
+                <h2 id="status-title">통과!</h2>
+                <p id="status-desc">17은 소수입니다.</p>
+                <button id="next-btn" class="primary-btn">다음 라운드</button>
+            </div>
+        </div>
+
+        <!-- 랭킹 등록 오버레이 (게임 종료 시) -->
+        <div id="rank-entry-overlay" class="hidden">
+            <div class="message-content glass">
+                <h2>GAME OVER</h2>
+                <p>최종 점수: <span id="final-score">0</span></p>
+                <div id="new-record-input" class="hidden">
+                    <p class="accent">새로운 기록입니다!</p>
+                    <input type="text" id="player-name" placeholder="이름을 입력하세요" maxlength="10">
+                    <button id="save-rank-btn" class="primary-btn">기록 저장</button>
+                </div>
+                <button id="restart-btn" class="secondary-btn">기록 없이 재시작</button>
+            </div>
+        </div>
+
+        <!-- 랭킹 보드 오버레이 -->
+        <div id="leaderboard-overlay" class="hidden">
+            <div class="message-content glass leaderboard">
+                <h2>TOP 5 RANKING</h2>
+                <ul id="rank-list">
+                    <!-- 랭킹 목록이 여기에 표시됩니다 -->
+                </ul>
+                <div class="overlay-controls">
+                    <button id="close-rank-btn" class="secondary-btn">닫기</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 Prime Maker. High IQ Challenge.</p>
+        </footer>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
